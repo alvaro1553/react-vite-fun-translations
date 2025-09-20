@@ -1,15 +1,13 @@
 import clsx from "clsx";
 
-export default function Input({
-  onChange,
-  className,
-  ...props
-}: React.HTMLProps<HTMLInputElement>) {
+export interface InputProps extends React.ComponentProps<'input'>{}
+
+export default function Input(props: InputProps) {
+  const { className, ...rest } = props;
   return (
     <input
-      {...props}
-      onChange={onChange}
-      className={clsx("p-3 border border-gray-400 rounded-md", className)}
+      {...rest}
+      className={clsx(className, "p-3 border border-gray-400 rounded-md")}
     />
   );
 }

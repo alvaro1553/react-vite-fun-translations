@@ -1,5 +1,7 @@
+import type {Translation} from "../../domain/types/Translation";
+
 class YodaTranslationRepo {
-  async getTranslation(text: string) {
+  async getTranslation(text: string): Promise<Translation> {
     // const response = await fetch(
     //   "https://api.funtranslations.com/translate/yoda.json",
     //   { method: "POST", body: JSON.stringify({ text }) }
@@ -11,11 +13,7 @@ class YodaTranslationRepo {
       "../mocks/api.funtranslations.com_translate_yoda.json.json"
     );
 
-    return Promise.resolve({
-      json() {
-        return json;
-      },
-    });
+    return Promise.resolve(json.contents as Translation);
   }
 }
 

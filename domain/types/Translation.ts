@@ -1,8 +1,9 @@
 import type { Engine } from "./Engine";
 
 type Translation = {
+  translation: Engine;
   text: string;
-  engine: Engine;
+  translated: string;
 };
 
 export type { Translation };
