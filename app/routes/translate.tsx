@@ -2,7 +2,7 @@ import type { Route } from "./+types/translate";
 import { TranslateForm } from "../translate/form";
 import Content from "view/components/Content";
 import SidePane from "view/components/Sidepane";
-import { createDefaultFunTranslationService } from "io/service/FunTranslationService";
+import {getTranslationServiceSingleton} from "../../io/service/TranslationService";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -17,7 +17,7 @@ export async function action({ request }: Route.ActionArgs) {
   if (typeof text !== "string") {
     return { error: "Invalid text. Please insert a valid string" }
   }
-  const translationService = createDefaultFunTranslationService();
+  const translationService = getTranslationServiceSingleton();
   const { translated } = await translationService.getTranslation(text);
   // should I do something with that request?
 

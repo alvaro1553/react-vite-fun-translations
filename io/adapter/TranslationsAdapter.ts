@@ -1,19 +1,24 @@
-import type {Translation} from "../../domain/types/Translation";
+import {isTranslation, type Translation} from "../../domain/types/Translation";
+import {invariant} from "../../utils/invariant";
 
 class TranslationsAdapter {
   async getTranslation(text: string): Promise<Translation> {
-    // const response = await fetch(
-    //   "https://api.funtranslations.com/translate/yoda.json",
-    //   { method: "POST", body: JSON.stringify({ text }) }
-    // );
-    //
-    // return response;
-
-    const json = await import(
-      "../mocks/api.funtranslations.com_translate_yoda.json.json"
+    const response = await fetch(
+      "https://api.funtranslations.com/translate/yoda.json",
+      {
+        method: "POST",
+        headers: {
+          contentType: "x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ text })
+      }
     );
 
-    return Promise.resolve(json.contents as Translation);
+    const json = await response.json();
+    const translation = json?.contents;
+    invariant(isTranslation(translation), "Invalid response. Expected: Translation. Received:", json);
+
+    return translation;
   }
 }
 
