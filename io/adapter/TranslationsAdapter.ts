@@ -1,6 +1,6 @@
 import type {Translation} from "../../domain/types/Translation";
 
-class YodaTranslationRepo {
+class TranslationsAdapter {
   async getTranslation(text: string): Promise<Translation> {
     // const response = await fetch(
     //   "https://api.funtranslations.com/translate/yoda.json",
@@ -17,4 +17,4 @@ class YodaTranslationRepo {
   }
 }
 
-export default YodaTranslationRepo;
+export default TranslationsAdapter;

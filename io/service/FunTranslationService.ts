@@ -1,24 +1,24 @@
 import type { Translation } from "domain/types/Translation";
-import YodaTranslationRepo from "../repo/YodaTranslationRepo";
+import TranslationsAdapter from "../adapter/TranslationsAdapter";
 
 interface FunTranslationService {
   getTranslation(text: string): Promise<Translation>;
 }
 
 class DefaultFunTranslationService implements FunTranslationService {
-  repo: YodaTranslationRepo;
+  adapter: TranslationsAdapter;
 
-  constructor(repo: YodaTranslationRepo) {
-    this.repo = repo;
+  constructor(adapter: TranslationsAdapter) {
+    this.adapter = adapter;
   }
 
   async getTranslation(text: string): Promise<Translation> {
-    return await this.repo.getTranslation(text);
+    return await this.adapter.getTranslation(text);
   }
 }
 
 const createDefaultFunTranslationService = () => {
-  const yodaRepo = new YodaTranslationRepo();
+  const yodaRepo = new TranslationsAdapter();
   const service = new DefaultFunTranslationService(yodaRepo);
 
   return service;
