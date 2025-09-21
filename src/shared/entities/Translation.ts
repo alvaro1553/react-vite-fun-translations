@@ -1,6 +1,6 @@
 let translationKey = 0;
 
-export const Engines = ['yoda', 'pirate'] as const;
+export const Engines = ['yoda', 'pirate', 'alvaro'] as const;
 
 export type Translation = {
   key: TranslationKey;

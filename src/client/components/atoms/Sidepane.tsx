@@ -7,7 +7,7 @@ export function SidePane(props: SidePaneProps) {
   return (
     <div
       {...rest}
-      className={clsx(className, "bg-zinc-50/20 max-w-sm p-6")}
+      className={clsx(className, "bg-zinc-50/20 p-6 w-full max-w-xs flex-none")}
     />
   );
 }

@@ -1,6 +1,6 @@
 import {
   createTranslation,
-  type Translation,
+  type Translation, type TranslationEngine,
 } from "../../shared/entities/Translation";
 import { invariant } from "../../shared/utils/functions";
 import {Obj} from "../../shared/utils/Obj";
@@ -46,16 +46,16 @@ const fromDTO = (funTranslationsDTO: unknown): Translation => {
 }
 
 export class TranslationAPI {
-  async getTranslation(text: string): Promise<Translation | TranslationError> {
+  async getTranslation(text: string, engine: TranslationEngine): Promise<Translation | TranslationError> {
     try {
       const response = await fetch(
-        "https://api.funtranslations.com/translate/yoda.json",
+        `https://api.funtranslations.com/translate/${engine}.json`,
         {
           method: "POST",
           headers: {
-            contentType: "x-www-form-urlencoded",
+            "Content-Type": "application/x-www-form-urlencoded",
           },
-          body: new URLSearchParams({text})
+          body: new URLSearchParams({ text })
         }
       );
 
