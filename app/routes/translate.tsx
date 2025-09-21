@@ -18,10 +18,10 @@ export async function action({ request }: Route.ActionArgs) {
     return { error: "Invalid text. Please insert a valid string" }
   }
   const translationService = getTranslationServiceSingleton();
-  const { translated } = await translationService.getTranslation(text);
+  const { translatedText } = await translationService.getTranslation(text);
   // should I do something with that request?
 
-  return { error: null, translated };
+  return { error: null, translated: translatedText };
 }
 
 export default function Translate(props: Route.ComponentProps) {

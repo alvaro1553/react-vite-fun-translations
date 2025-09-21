@@ -1,28 +1,32 @@
 import type {Translation, TranslationText} from "domain/types/Translation";
-import TranslationsAdapter from "../adapter/TranslationsAdapter";
+import TranslationsAPI from "../adapter/TranslationsAPI";
 import { InMemoryCache } from "../../utils/InMemoryCache";
 
 let translationServiceSingleton: TranslationService;
 
 export interface TranslationServiceOptions {
-  adapter?: TranslationsAdapter;
+  adapter?: TranslationsAPI;
   cache?: InMemoryCache<TranslationText, Translation>;
 }
 
 export class TranslationService {
-  adapter: TranslationsAdapter;
+  translationAPI: TranslationsAPI;
   cache: InMemoryCache<TranslationText, Translation>;
 
   constructor(options?: TranslationServiceOptions) {
-    this.adapter = options?.adapter ?? new TranslationsAdapter();
+    this.translationAPI = options?.adapter ?? new TranslationsAPI();
     this.cache = options?.cache ?? new InMemoryCache<TranslationText, Translation>();
   }
 
   /**
-   * Fetch the translation of the given text and cache the result.
+   * Fetch the translation of the given text.
    *
-   * The next call to `getTranslation` in `options.invalidateCacheInMS` milliseconds
-   * will return the cached translation instead of fetching a new translation again.
+   * The result is cached. The next call to `getTranslation` with the same `text`
+   * within `options.invalidateCacheInMS` milliseconds will return the cached
+   * translation instead of fetching it. After `options.invalidateCacheInMS` milliseconds,
+   * the cached translation will be invalidated and a new translation will be fetched
+   * if `getTranslation` is called with that `text`. The default invalidation
+   * time is 5 minutes.
    */
   async getTranslation(text: TranslationText, options?: { invalidateCacheInMS?: number }): Promise<Translation> {
     const { invalidateCacheInMS = 1000 * 60 * 5 } = options ?? {};
@@ -33,7 +37,7 @@ export class TranslationService {
       return cached;
     }
 
-    const translation = await this.adapter.getTranslation(text);
+    const translation = await this.translationAPI.getTranslation(text);
     this.cache.set(key, translation, invalidateCacheInMS);
     return translation;
   }
