@@ -1,4 +1,4 @@
-import { type Translation } from "../../shared/types/Translation";
+import {createTranslation, type Translation} from "../../shared/entities/Translation";
 import { invariant } from "../../shared/utils/functions";
 import {Obj} from "../../shared/utils/Obj";
 
@@ -31,14 +31,14 @@ const isDTO = (value: unknown): value is FunTranslationsDTO => {
 const fromDTO = (funTranslationsDTO: unknown): Translation => {
   invariant(isDTO(funTranslationsDTO), "Invalid parameter. Expected: FunTranslationsDTO. Received:", funTranslationsDTO);
   const { translation, text, translated } = funTranslationsDTO.contents;
-  return {
+  return createTranslation({
     engine: translation,
     originalText: text,
     translatedText: translated,
-  };
+  });
 }
 
-class TranslationsAPI {
+export class TranslationAPI {
   async getTranslation(text: string): Promise<Translation> {
     const response = await fetch(
       "https://api.funtranslations.com/translate/yoda.json",
@@ -54,5 +54,3 @@ class TranslationsAPI {
     return fromDTO(json);
   }
 }
-
-export default TranslationsAPI;
