@@ -40,6 +40,11 @@ export async function action({ request }: Route.ActionArgs) {
     return { error: "Invalid id" };
   }
 
+  if (intent === "clear_history") {
+    await translationService.clearHistory();
+    return { error: null };
+  }
+
   const text = formData.get("text");
   if (typeof text !== "string") {
     return { error: "Invalid text. Please insert a valid string" };
@@ -74,7 +79,7 @@ export default function Translate(props: Route.ComponentProps) {
   const ENGINE_LABELS: Record<TranslationEngine, string> = {
     yoda: 'Yoda',
     pirate: 'Pirate',
-    alvaro: "Alvaro's",
+    alvaro: "Alvaro",
   };
   const menuItems = Engines.map((e) => ({ key: e, label: ENGINE_LABELS[e] }));
 
@@ -94,7 +99,18 @@ export default function Translate(props: Route.ComponentProps) {
         </div>
         <div className="flex items-start gap-6">
           <SidePane>
-            <h2 className="font-semibold text-zinc-700 mb-3">Recent translations</h2>
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <h2 className="font-semibold text-zinc-700">Recent translations</h2>
+              {loaderData.history.length > 1 && (
+                <ButtonForm
+                  component={fetcher.Form}
+                  method="POST"
+                  action="/translate"
+                  fields={{ _intent: "clear_history" }}
+                  label="Clear"
+                />
+              )}
+            </div>
             <List>
               {loaderData.history.map((item) => (
                 <ListItem

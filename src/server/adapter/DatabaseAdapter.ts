@@ -20,5 +20,8 @@ export class DatabaseAdapter {
   remove<T>(collection: string, match: (record: T) => boolean) {
     return this.driver.remove<T>(collection, match);
   }
+  clear(collection: string) {
+    return this.driver.clear(collection);
+  }
 }
 

@@ -26,5 +26,9 @@ export class TranslationRepo {
   async removeByKey(key: TranslationKey): Promise<void> {
     await this.#db.remove<Translation>(COLLECTION, t => t.key === key);
   }
+
+  async clearAll(): Promise<void> {
+    await this.#db.clear(COLLECTION);
+  }
 }
 

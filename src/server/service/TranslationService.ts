@@ -68,6 +68,10 @@ export class TranslationService {
     await this.repo.removeByKey(key);
   }
 
+  async clearHistory(): Promise<void> {
+    await this.repo.clearAll();
+  }
+
   private getCacheKey(text: TranslationText, engine: TranslationEngine): string {
     return `${engine}|${text}`;
   }

@@ -349,12 +349,12 @@ export default function Translate(props: Route.ComponentProps) {...}
                   <span>Multiple translation engines</span>
                 </summary>
                 <div className="px-4 pb-4 space-y-3 text-sm text-zinc-600">
-                  <p>Choose Yoda, Pirate, or Alvaro's playful engine. The last engine runs in the solution's server in case you reach the fun-translations-api limit (10 requests) of the first two engines.</p>
+                  <p>Choose Yoda, Pirate, or Alvaro playful engine. The last engine runs in the solution's server in case you reach the fun-translations-api limit (10 requests) of the first two engines.</p>
                   <CodeBlockTs code={`// src/routes/translate.tsx
 const ENGINE_LABELS: Record<TranslationEngine, string> = {
   yoda: 'Yoda',
   pirate: 'Pirate',
-  alvaro: "Alvaro's",
+  alvaro: "Alvaro",
 };
 const menuItems = Engines.map((e) => ({ key: e, label: ENGINE_LABELS[e] }));`} />
                 </div>
