@@ -5,6 +5,7 @@ export interface DatabaseDriver {
   getAll<T>(collection: Collection): Promise<DBRecord<T>[]>;
   insert<T>(collection: Collection, record: T): Promise<DBRecord<T>>;
   remove<T>(collection: Collection, match: (r: T) => boolean): Promise<void>;
+  clear(collection: Collection): Promise<void>;
 }
 
 export class InMemoryDB implements DatabaseDriver {
@@ -24,6 +25,12 @@ export class InMemoryDB implements DatabaseDriver {
     const col = this.getOrCreateCollection(collection);
     const idx = col.findIndex(match);
     if (idx >= 0) col.splice(idx, 1);
+  }
+
+  async clear(collection: Collection): Promise<void> {
+    const col = this.getOrCreateCollection(collection);
+    col.length = 0;
+    this.#store.delete(collection);
   }
 
   private getOrCreateCollection(collection: Collection): DBRecord<any>[] {
