@@ -15,8 +15,7 @@ import {isTranslationError} from "../../shared/entities/TranslationError";
 
 export function meta({}: Route.MetaArgs) {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "Fun Translations by Alvaro" },
   ];
 }
 
@@ -35,9 +34,9 @@ export async function action({ request }: Route.ActionArgs) {
     const id = formData.get("id");
     if (typeof id === "string") {
       await translationService.removeHistoryEntry(id);
-      return { ok: true };
+      return { error: null };
     }
-    return { ok: false, error: "Invalid id" };
+    return { error: "Invalid id" };
   }
 
   const text = formData.get("text");
@@ -50,6 +49,7 @@ export async function action({ request }: Route.ActionArgs) {
   }
 
   if (Env.NO_PROD) {
+    // Mock delay in development to show 'loading...'.
     await waitMS(600);
   }
   const translation = await translationService.getTranslationOrCached(text, { engine });

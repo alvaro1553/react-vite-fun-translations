@@ -1,76 +1,490 @@
-export function WelcomePage() {
-  return (
-    <main className="flex items-center justify-center pt-16 pb-4">
-      <div className="flex-1 flex flex-col items-center gap-16 min-h-0">
-        <header className="flex flex-col items-center gap-9">
-          <div className="w-[500px] max-w-[100vw] p-4">
-          </div>
-        </header>
-        <div className="max-w-[300px] w-full space-y-6 px-4">
-          <nav className="rounded-3xl border border-gray-200 p-6 dark:border-gray-700 space-y-4">
-            <p className="leading-6 text-gray-700 dark:text-gray-200 text-center">
-              What&apos;s next?
-            </p>
-            <ul>
-              {resources.map(({ href, text, icon }) => (
-                <li key={href}>
-                  <a
-                    className="group flex items-center gap-3 self-stretch p-3 leading-normal text-blue-700 hover:underline dark:text-blue-500"
-                    href={href}
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    {icon}
-                    {text}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
+import { useState } from "react";
+export function WelcomePage(props: { children?: React.ReactNode }) {
+  const { children } = props;
+
+  const folderStructureBeforeFolded = `project/
+├─ app/
+│  └─ ...
+├─ domain/
+│  └─ ...
+├─ io/
+│  └─ ...
+├─ view/
+│  └─ ...
+├─ package.json
+└─ package-lock.json`;
+
+  const folderStructureBeforeFull = `project/
+├─ app/
+│  ├─ routes/
+│  ├─ translate/
+│  │  └─ form.tsx
+│  ├─ welcome/
+│  │  ├─ logo-dark.svg
+│  │  ├─ logo-light.svg
+│  │  └─ welcome.tsx
+│  ├─ app.css
+│  ├─ root.tsx
+│  └─ routes.ts
+├─ domain/
+│  └─ types/
+│     ├─ Engine.ts
+│     └─ Translation.ts
+├─ io/
+│  ├─ codec/
+│  │  └─ fun-translation.ts
+│  ├─ mocks/
+│  │  └─ api.funtranslations.com_translate_yoda.json.json
+│  ├─ repo/
+│  │  └─ YodaTranslationRepo.ts
+│  └─ service/
+│     ├─ CacheService.ts
+│     └─ FunTranslationService.ts
+├─ view/
+│  └─ components/
+│     ├─ Button.tsx
+│     ├─ Content.tsx
+│     ├─ Input.tsx
+│     └─ Sidepane.tsx
+├─ package.json
+└─ package-lock.json`
+
+  const folderStructureAfterFullFolded = `project/
+├─src/
+  ├─ client/            <- UI/view (encapsulated)
+  │  ├─ components/     <- Atomic Design
+  │  │  ├─ atoms/       <- e.g. Button.tsx, Input.tsx, ...
+  │  │  ├─ molecules/   <- e.g. Form.tsx, ...
+  │  │  └─ pages/       <- e.g. WelcomePage.tsx, ...
+  │  └─ ...
+  ├─ server/
+  │  ├─ adapter/        <- Top layer: adapt/map external services e.g. Postgres, AWS-S3, etc.  
+  │  ├─ repo/           <- Middle layer: abstract usage of db collections/tables
+  │  └─ service/        <- Lower layer: orchestrates application logic
+  └─ shared/            <- Bottom layer: business logic that depends on nothing (shared by client and server)
+├─ package.json
+└─ package-lock.json`;
+
+  const folderStructureAfterFull = `project/
+├─src/
+  ├─ client/            <- UI/view (encapsulated)
+  │  ├─ components/     <- Atomic Design
+  │  │  ├─ atoms/       <- e.g. Button.tsx, Input.tsx, ...
+  │  │  ├─ molecules/   <- e.g. Form.tsx, ...
+  │  │  └─ pages/       <- e.g. WelcomePage.tsx, ...
+  │  ├─ routes/              
+  │  ├─ root.css
+  │  ├─ root.tsx
+  │  └─ routes.ts
+  ├─ server/
+  │  ├─ adapter/        <- Top layer: adapt/map external services e.g. Postgres, AWS-S3, etc.  
+  │  │  ├─ DatabaseAdapter.ts
+  │  │  └─ TranslationAPI.ts
+  │  ├─ repo/           <- Middle layer e.g. abstract usage of collections/tables
+  │  │  └─ TranslationRepo.ts
+  │  └─ service/        <- Lower layer: orchestrate adapters/repo (i.e. layer below) 
+  │     └─ TranslationService.ts 
+  └─ shared/
+     ├─ entities/       <- Bottom layer i.e. app logic that depends on nothing (shared by client and server)
+     │  ├─ Translation.ts
+     │  └─ TranslationError.ts
+     └─ utils/          <- Bottom layer i.e. unrelated logic that depends on nothing (shared across projects)
+        ├─ Env.ts
+        ├─ Obj.ts
+        └─ ...
+├─ package.json
+└─ package-lock.json`
+
+  const [showFullBefore, setShowFullBefore] = useState(false);
+  const [showFullAfter, setShowFullAfter] = useState(false);
+
+  const wrapTree = (s: string) => (
+    <>
+      {Array.from(s).map((ch, idx) => {
+        const isTree = "│├└─".includes(ch);
+        return <span key={idx} className={isTree ? "tree-line" : undefined}>{ch}</span>;
+      })}
+    </>
+  );
+
+  function renderFolderTree(tree: string, caption?: string) {
+    return (
+      <figure className="relative w-full">
+        {caption && (
+          <figcaption className="mb-2 text-xs text-zinc-500">{caption}</figcaption>
+        )}
+        <div className="relative rounded-md border bg-zinc-50">
+          <pre className="p-4 overflow-x-auto text-sm leading-6">
+            <code>
+              {tree.split("\n").map((line, i) => {
+                let content: any = wrapTree(line);
+                // Match a folder name ending with '/' and allow any suffix (e.g., comments like "<- ...")
+                const m = line.match(/^(.*?)([A-Za-z0-9._-]+)\/(.*)$/);
+                if (m) {
+                  const prefix = m[1];
+                  const name = m[2];
+                  const suffix = m[3] ?? "";
+                  content = (
+                    <>
+                      {wrapTree(prefix)}
+                      <span className="folder">{name}</span>/{wrapTree(suffix)}
+                    </>
+                  );
+                }
+                return (
+                  <div key={i} className="whitespace-pre">
+                    {content}
+                  </div>
+                );
+              })}
+            </code>
+          </pre>
         </div>
-      </div>
+      </figure>
+    );
+  }
+
+  // Lightweight TypeScript code highlighting without external deps
+  const escapeHtml = (str: string) =>
+    str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+  function highlightTs(src: string): string {
+    let s = escapeHtml(src);
+
+    type Ph = { key: string; html: string };
+    const placeholders: Ph[] = [];
+    const place = (regex: RegExp, cls: string) => {
+      s = s.replace(regex, (m) => {
+        const key = `__${cls.toUpperCase()}_${placeholders.length}__`;
+        placeholders.push({ key, html: `<span class=\"ts-${cls}\">${m}</span>` });
+        return key;
+      });
+    };
+
+    // Extract comments and strings first to avoid inner replacements
+    place(/\/\*[\s\S]*?\*\//g, "comment");
+    place(/\/\/.*$/gm, "comment");
+    place(/(["'`])(?:\\.|(?!\1)[\s\S])*\1/g, "string");
+
+    // Keywords
+    s = s.replace(/\b(async|await|class|interface|type|export|import|from|extends|implements|new|function|const|let|return|if|else|try|catch|finally|throw|switch|case|break)\b/g, '<span class="ts-kw">$1</span>');
+
+    // Reserved constants
+    s = s.replace(/\b(null|undefined|true|false|NaN|Infinity)\b/g, '<span class="ts-const">$1</span>');
+
+    // Numbers
+    s = s.replace(/\b\d+(?:_\d+)*(?:\.\d+)?\b/g, '<span class="ts-number">$&</span>');
+
+    // Capitalized identifiers as types
+    s = s.replace(/\b[A-Z][A-Za-z0-9_]*\b/g, '<span class="ts-type">$&</span>');
+
+    // Method calls: .methodName(
+    s = s.replace(/\.([A-Za-z_$][\w$]*)\s*(?=\()/g, '.<span class="ts-fn">$1</span>');
+
+    // Object properties (not followed by '(')
+    s = s.replace(/\.([A-Za-z_$][\w$]*)\b(?!\s*\()/g, '.<span class="ts-prop">$1</span>');
+
+    // Standalone function calls: fnName(
+    s = s.replace(/(^|[^.\w$])([A-Za-z_$][\w$]*)\s*(?=\()/g, '$1<span class="ts-fn">$2</span>');
+
+    // Restore placeholders
+    placeholders.forEach((p) => {
+      s = s.replace(p.key, p.html);
+    });
+
+    return s;
+  }
+
+  function CodeBlockTs({ code }: { code: string }) {
+    const html = highlightTs(code);
+    return (
+      <pre className="p-4 overflow-x-auto rounded-md bg-zinc-900 text-zinc-50 text-sm">
+        <code dangerouslySetInnerHTML={{ __html: html }} />
+      </pre>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-gradient-to-b from-indigo-50 to-white text-zinc-800">
+      <section className="container mx-auto px-4 py-16 flex flex-col items-center text-center">
+        <h1 className="text-5xl md:text-6xl leading-[1.15] md:leading-[1.15] pb-1 font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-fuchsia-600 to-rose-600 drop-shadow-sm">
+          Challenge complete ! 🚀
+        </h1>
+        <p className="mt-4 text-lg md:text-2xl text-zinc-600 max-w-3xl">
+          A tiny tour through the requirements and the solution
+        </p>
+        <div className="mt-8 w-full max-w-2xl text-left" aria-labelledby="req-title">
+          <h2 id="req-title" className="text-xl font-semibold text-zinc-700">Assignment</h2>
+          <ul className="mt-3 space-y-3">
+            <li>
+              <details className="group rounded-lg border border-zinc-200 bg-white/70 backdrop-blur hover:bg-white open:shadow-md transition">
+                <summary className="cursor-pointer select-none p-4 marker:content-[''] flex items-center gap-3">
+                  <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-green-400 text-green-600 focus:ring-0" aria-label="Bring the app in a working state" />
+                  <span>Bring the app to a working state</span>
+                  <span className="ml-auto text-xs text-zinc-500 group-open:hidden">click to expand</span>
+                  <span className="ml-auto text-xs text-zinc-500 hidden group-open:inline">click to collapse</span>
+                </summary>
+                <div className="px-4 pb-4 space-y-3 text-sm text-zinc-600">
+                  <p>The app was modified/expanded as little as possible to keep it easier to understand.</p>
+                  <p>Check below the client's core logic (Folder structure explained in the next item).</p>
+                  <CodeBlockTs code={`// src/routes/translate.tsx
+                  
+// Load a history with every translation ever made
+export async function loader({}: Route.LoaderArgs) {
+  const translationService = getTranslationServiceSingleton();
+  const history = await translationService.getHistory();
+  return { history };
+}
+
+// Submit the text translation, or delete an entry from the history
+export async function action({ request }: Route.ActionArgs) {
+  const formData = await request.formData();
+  const intent = formData.get("_intent");
+  const translationService = getTranslationServiceSingleton();
+
+  if (intent === "delete_history") {
+    const id = formData.get("id");
+    /* ... stuff to validate id ... */
+    await translationService.removeHistoryEntry(id);
+    return { error: null };
+  }
+
+  const text = formData.get("text");
+  const engine = formData.get("engine");
+  /* ... stuff to validate text and engine ... */
+  
+  const translation = await translationService.getTranslationOrCached(text, { engine });
+  /* ... stuff to handle translation errors ... */
+
+  return { error: null, translated: translation.translatedText };
+}
+
+// The solution (clean architecture): inversion of control and atomic design separates the app's logic from the view 
+export default function Translate(props: Route.ComponentProps) {...}
+`} />
+                </div>
+              </details>
+            </li>
+
+            <li>
+              <details className="group rounded-lg border border-zinc-200 bg-white/70 backdrop-blur hover:bg-white open:shadow-md transition">
+                <summary className="cursor-pointer select-none p-4 marker:content-[''] flex items-center gap-3">
+                  <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-green-400 text-green-600 focus:ring-0" aria-label="Clean Architecture" />
+                  <span>Clean Architecture</span>
+                </summary>
+                <div className="px-4 pb-4">
+                  <p className="mb-3 text-sm text-zinc-600">
+                    The initial folder structure has some issues:
+                  </p>
+                  <ul className="mb-4 ml-5 list-disc text-sm text-zinc-600">
+                    <li>It mixes app modules and config. Suggested: encapsulate src code in src/</li>
+                    <li>It doesn't separate concerns. Suggested: split into client/, server/ and shared/</li>
+                    <li>It doesn't fully comply with a clean architecture<br/>e.g. service/ is placed inside io/, but service is not input-output<br/>e.g. the ui is scattered across app/ and view/<br/> e.g. YodaTranslationRepo.ts has nothing to do with db/storage yet is suffixed 'Repo'</li>
+                    <li>It doesn't architecture components. Suggested: atomic design (atoms, molecules, etc).</li>
+                  </ul>
+                  <p className="mb-3 text-sm text-zinc-600">
+                    Improved folder structure that fully complies with a clean architecture:
+                  </p>
+                  <div className="flex gap-2 justify-center ">
+                    <div className="min-w-0 basis-0 flex-1">
+                      {renderFolderTree(showFullBefore ? folderStructureBeforeFull : folderStructureBeforeFolded, "Initial folder structure")}
+                      <button
+                        type="button"
+                        aria-expanded={showFullBefore}
+                        onClick={() => setShowFullBefore((v) => !v)}
+                        className="mt-2 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
+                      >
+                        {showFullBefore ? 'Hide full tree' : 'Show full tree'}
+                      </button>
+                    </div>
+                    <div className="min-w-0 basis-0 flex-1">
+                      {renderFolderTree(showFullAfter ? folderStructureAfterFull : folderStructureAfterFullFolded, "Improved folder structure")}
+                      <button
+                        type="button"
+                        aria-expanded={showFullAfter}
+                        onClick={() => setShowFullAfter((v) => !v)}
+                        className="mt-2 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-medium text-indigo-600 hover:bg-indigo-50"
+                      >
+                        {showFullAfter ? 'Hide full tree' : 'Show full tree'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </details>
+            </li>
+
+            <li>
+              <details className="group rounded-lg border border-zinc-200 bg-white/70 backdrop-blur hover:bg-white open:shadow-md transition">
+                <summary className="cursor-pointer select-none p-4 marker:content-[''] flex items-center gap-3">
+                  <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-green-400 text-green-600 focus:ring-0" aria-label="Clean Architecture" />
+                  <span>Submit the form to show the text translation</span>
+                </summary>
+                <div className="px-4 pb-4 space-y-3 text-sm text-zinc-600">
+                  <p>The UI/view also follows a clean architecture: InputForm is a molecule-component (top-layer) that knows nothing about the app logic (submission/state/etc.) handled by a route-component (lower-layer)</p>
+                  <CodeBlockTs code={`// src/routes/translate.tsx
+<InputForm
+  component={fetcher.Form}
+  method='POST'
+  action='/translate'
+  submitLabel={loading ? 'Translating...' : 'Translate'}
+  submitLoading={loading}
+  submitSuccess={fetcher.data?.translated}
+  submitError={fetcher.data?.error}
+  menuLabel="Engine:"
+  menuOptions={menuItems}
+  menuActiveKey={engine}
+  onMenuSelect={(key) => setEngine(key as TranslationEngine)}
+/>`} />
+                </div>
+              </details>
+            </li>
+
+            <li>
+              <details className="group rounded-lg border border-zinc-200 bg-white/70 backdrop-blur hover:bg-white open:shadow-md transition">
+                <summary className="cursor-pointer select-none p-4 marker:content-[''] flex items-center gap-3">
+                  <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-green-400 text-green-600 focus:ring-0" aria-label="Multiple engines" />
+                  <span>Multiple translation engines</span>
+                </summary>
+                <div className="px-4 pb-4 space-y-3 text-sm text-zinc-600">
+                  <p>Choose Yoda, Pirate, or Alvaro's playful engine. The last engine runs in the solution's server in case you reach the fun-translations-api limit (10 requests) of the first two engines.</p>
+                  <CodeBlockTs code={`// src/routes/translate.tsx
+const ENGINE_LABELS: Record<TranslationEngine, string> = {
+  yoda: 'Yoda',
+  pirate: 'Pirate',
+  alvaro: "Alvaro's",
+};
+const menuItems = Engines.map((e) => ({ key: e, label: ENGINE_LABELS[e] }));`} />
+                </div>
+              </details>
+            </li>
+
+            <li>
+              <details className="group rounded-lg border border-zinc-200 bg-white/70 backdrop-blur hover:bg-white open:shadow-md transition">
+                <summary className="cursor-pointer select-none p-4 marker:content-[''] flex items-center gap-3">
+                  <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-green-400 text-green-600 focus:ring-0" aria-label="Cache the translations API" />
+                  <span>Cache the translations API</span>
+                </summary>
+                <div className="px-4 pb-4 space-y-3">
+                  <p className="text-sm text-zinc-600">A second request with the same text and engine is retrieved from an in-memory cache, which is invalidated after 5 mins by default.</p>
+                  <CodeBlockTs code={`// src/server/service/TranslationService.tsx
+async getTranslationOrCached(text, options) {
+  const { invalidateCacheInMS = 1000 * 60 * 5, engine } = options;
+
+  const key = this.getCacheKey(text, engine);
+  const cached = this.cache.get(key);
+  if (cached) {
+    // For simplicity, the order in the db table/collection is the order in the 'Recent Translations History'. 
+    await this.repo.insertOrMoveToTop(cached);
+    return cached;
+  }
+
+  let translation: Translation | TranslationError;
+  if (engine === 'alvaro') {
+    translation = this.alvarize(text);
+  } else {
+    translation = await this.api.getTranslation(text, engine);
+  }
+
+  if (isTranslationError(translation)) {
+    return translation;
+  }
+
+  this.cache.set(key, translation, invalidateCacheInMS);
+  await this.repo.insertOrMoveToTop(translation);
+  return translation;
+}
+`} />
+                </div>
+              </details>
+            </li>
+
+            <li>
+              <details className="group rounded-lg border border-zinc-200 bg-white/70 backdrop-blur hover:bg-white open:shadow-md transition">
+                <summary className="cursor-pointer select-none p-4 marker:content-[''] flex items-center gap-3">
+                  <input type="checkbox" checked readOnly className="h-4 w-4 rounded border-green-400 text-green-600 focus:ring-0" aria-label="History of translations" />
+                  <span>History of translations</span>
+                </summary>
+                <div className="px-4 pb-4 space-y-3">
+                  <p className="text-sm text-zinc-600">Recent translations are stored in a tiny in-memory DB, which can easily be replaced by a production-ready RDBMS thanks to its adapter's inversion of control.</p>
+                  <CodeBlockTs code={`// src/shared/utils/InMemoryDB.ts
+
+// Generic DB driver e.g. postgres ORM, mongo driver, in-memory driver, etc. i.e. top-layer (sharable across projects)
+export interface DatabaseDriver {
+  getAll<T>(collection: Collection): Promise<DBRecord<T>[]>;
+  insert<T>(collection: Collection, record: T): Promise<DBRecord<T>>;
+  remove<T>(collection: Collection, match: (r: T) => boolean): Promise<void>;
+}
+
+// Naive implementation to be used as a default value i.e. top-layer (sharable across projects)
+export class InMemoryDB implements DatabaseDriver {
+  #store = new Map<Collection, DBRecord<any>[]>([["translations", initial]]);
+  async getAll<T>(collection: Collection): Promise<DBRecord<T>[]> {...}
+  async insert<T>(collection: Collection, record: T): Promise<DBRecord<T>> {...}
+  async remove<T>(collection: Collection, match: (r: T) => boolean): Promise<void> {...}
+  private getOrCreateCollection(collection: Collection): DBRecord<any>[] {...}
+  
+// src/server/adapter/DatabaseAdapter.ts
+
+// Adapter that encapsulates the db-driver details i.e. lower-layer (sharable by every usage of the DB)
+export class DatabaseAdapter {
+  driver: DatabaseDriver;
+  constructor(options: DatabaseAdapterOptions) {..}
+  getAll<T>(collection: string) {..}
+  insert<T>(collection: string, record: T) {..}
+  remove<T>(collection: string, match: (record: T) => boolean) {..}
+}
+
+// src/server/repo/TranslationRepo.ts
+
+// Adapter that encapsulates the Translation collection/table details i.e. lower-lower-layer (sharable by every usage of the Translation collection/table)
+export class TranslationRepo {
+  #db: DatabaseAdapter;
+  constructor(options: TranslationRepoOptions) {..}
+  async getAll(): Promise<Translation[]> {..}
+  async insertOrMoveToTop(translation: Translation): Promise<void> {..}
+  async removeByKey(key: TranslationKey): Promise<void> {..}
+}
+`
+
+
+                  } />
+                </div>
+              </details>
+            </li>
+          </ul>
+        </div>
+        <div className="mt-10 w-full max-w-2xl text-left">
+          { children }
+        </div>
+      </section>
+
+      <footer className="border-t border-zinc-200 bg-white/60 backdrop-blur">
+        <div className="container mx-auto px-4 py-6 text-center text-sm text-zinc-600">
+          <p>
+            Don't forget to email Alvaro — he really enjoyed the exercise and would love to chat about the architectural decisions that were made.
+            {" "}
+            <a href="mailto:alvaro.gp94@gmail.com" className="text-indigo-600 hover:text-indigo-700 underline underline-offset-2">Say hello</a>
+            .
+          </p>
+        </div>
+      </footer>
+
+      <style>{`
+        .folder { color: #3730a3; font-weight: 700; }
+        .tree-line { color: #9ca3af; }
+        code, pre code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+        .ts-kw { color: #a78bfa; }
+        .ts-string { color: #fca5a5; }
+        .ts-number { color: #fdba74; }
+        .ts-type { color: #7dd3fc; }
+        .ts-comment { color: #9ca3af; font-style: italic; }
+        .ts-const { color: #86efac; }
+        .ts-fn { color: #f9a8d4; }
+        .ts-prop { color: #c4b5fd; }
+      `}</style>
     </main>
   );
 }
-
-const resources = [
-  {
-    href: "https://reactrouter.com/docs",
-    text: "React Router Docs",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="20"
-        viewBox="0 0 20 20"
-        fill="none"
-        className="stroke-gray-600 group-hover:stroke-current dark:stroke-gray-300"
-      >
-        <path
-          d="M9.99981 10.0751V9.99992M17.4688 17.4688C15.889 19.0485 11.2645 16.9853 7.13958 12.8604C3.01467 8.73546 0.951405 4.11091 2.53116 2.53116C4.11091 0.951405 8.73546 3.01467 12.8604 7.13958C16.9853 11.2645 19.0485 15.889 17.4688 17.4688ZM2.53132 17.4688C0.951566 15.8891 3.01483 11.2645 7.13974 7.13963C11.2647 3.01471 15.8892 0.951453 17.469 2.53121C19.0487 4.11096 16.9854 8.73551 12.8605 12.8604C8.73562 16.9853 4.11107 19.0486 2.53132 17.4688Z"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-        />
-      </svg>
-    ),
-  },
-  {
-    href: "https://rmx.as/discord",
-    text: "Join Discord",
-    icon: (
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="20"
-        viewBox="0 0 24 20"
-        fill="none"
-        className="stroke-gray-600 group-hover:stroke-current dark:stroke-gray-300"
-      >
-        <path
-          d="M15.0686 1.25995L14.5477 1.17423L14.2913 1.63578C14.1754 1.84439 14.0545 2.08275 13.9422 2.31963C12.6461 2.16488 11.3406 2.16505 10.0445 2.32014C9.92822 2.08178 9.80478 1.84975 9.67412 1.62413L9.41449 1.17584L8.90333 1.25995C7.33547 1.51794 5.80717 1.99419 4.37748 2.66939L4.19 2.75793L4.07461 2.93019C1.23864 7.16437 0.46302 11.3053 0.838165 15.3924L0.868838 15.7266L1.13844 15.9264C2.81818 17.1714 4.68053 18.1233 6.68582 18.719L7.18892 18.8684L7.50166 18.4469C7.96179 17.8268 8.36504 17.1824 8.709 16.4944L8.71099 16.4904C10.8645 17.0471 13.128 17.0485 15.2821 16.4947C15.6261 17.1826 16.0293 17.8269 16.4892 18.4469L16.805 18.8725L17.3116 18.717C19.3056 18.105 21.1876 17.1751 22.8559 15.9238L23.1224 15.724L23.1528 15.3923C23.5873 10.6524 22.3579 6.53306 19.8947 2.90714L19.7759 2.73227L19.5833 2.64518C18.1437 1.99439 16.6386 1.51826 15.0686 1.25995ZM16.6074 10.7755L16.6074 10.7756C16.5934 11.6409 16.0212 12.1444 15.4783 12.1444C14.9297 12.1444 14.3493 11.6173 14.3493 10.7877C14.3493 9.94885 14.9378 9.41192 15.4783 9.41192C16.0471 9.41192 16.6209 9.93851 16.6074 10.7755ZM8.49373 12.1444C7.94513 12.1444 7.36471 11.6173 7.36471 10.7877C7.36471 9.94885 7.95323 9.41192 8.49373 9.41192C9.06038 9.41192 9.63892 9.93712 9.6417 10.7815C9.62517 11.6239 9.05462 12.1444 8.49373 12.1444Z"
-          strokeWidth="1.5"
-        />
-      </svg>
-    ),
-  },
-];

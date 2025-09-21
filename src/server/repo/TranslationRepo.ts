@@ -19,7 +19,7 @@ export class TranslationRepo {
   }
 
   async insertOrMoveToTop(translation: Translation): Promise<void> {
-    await this.#db.remove<Translation>(COLLECTION, t => t.originalText === translation.originalText);
+    await this.#db.remove<Translation>(COLLECTION, t => (t.originalText === translation.originalText && t.engine === translation.engine));
     await this.#db.insert(COLLECTION, translation);
   }
 
