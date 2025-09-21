@@ -8,7 +8,7 @@ export function Content(props: ContentProps) {
     <div
       {...rest}
       className={clsx(
-        "w-full h-full max-w-xl rounded-lg border border-zinc-200 bg-white/70 backdrop-blur p-6 text-zinc-800",
+        "w-full h-full md:basis-3/5 md:max-w-none rounded-lg border border-zinc-200 bg-white/70 backdrop-blur p-6 text-zinc-800",
         className,
       )}
     />

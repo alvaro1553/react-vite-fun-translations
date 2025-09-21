@@ -8,7 +8,7 @@ export function SidePane(props: SidePaneProps) {
     <div
       {...rest}
       className={clsx(
-        "w-full max-w-xs flex-none rounded-lg border border-zinc-200 bg-white/70 backdrop-blur p-6",
+        "w-full md:basis-2/5 md:flex-none md:max-w-none rounded-lg border border-zinc-200 bg-white/70 backdrop-blur p-6",
         className,
       )}
     />

@@ -85,7 +85,7 @@ export default function Translate(props: Route.ComponentProps) {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-indigo-50 to-white text-zinc-800">
-      <section className="container mx-auto px-4 py-12">
+      <section className="mx-auto max-w-5xl px-4 py-12">
         <div className="mb-6">
           <Link to="/" aria-label="Home" className="group inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700">
             <ShortLeftArrow className="h-5 w-5 flex-shrink-0 self-center" />
@@ -97,8 +97,25 @@ export default function Translate(props: Route.ComponentProps) {
             Heads up: The external FunTranslations API limits Yoda and Pirate engines to 10 requests per hour. Feel free to surpass this limit ! the app will show a friendly message, plus you can keep going using cached results or switching to Alvaro's unlimited engine.
           </p>
         </div>
-        <div className="flex items-start gap-6">
-          <SidePane>
+        <div className="flex w-full flex-col md:flex-row items-start gap-6">
+          <Content className="md:order-2">
+            <InputForm
+              component={fetcher.Form}
+              method='POST'
+              action='/translate'
+              submitLabel={loading ? 'Translating...' : 'Translate'}
+              submitLoading={loading}
+              submitSuccess={fetcher.data?.translated}
+              submitError={fetcher.data?.error}
+              inputPlaceholder="Enter the text to translate here"
+              menuLabel="Engine:"
+              menuButtonAriaLabel="Choose translation engine"
+              menuOptions={menuItems}
+              menuActiveKey={engine}
+              onMenuSelect={(key) => setEngine(key as TranslationEngine)}
+            />
+          </Content>
+          <SidePane className="md:order-1">
             <div className="mb-3 flex items-center justify-between gap-2">
               <h2 className="font-semibold text-zinc-700">Recent Translations</h2>
               {loaderData.history.length > 1 && (
@@ -133,23 +150,6 @@ export default function Translate(props: Route.ComponentProps) {
               )}
             </List>
           </SidePane>
-          <Content>
-            <InputForm
-              component={fetcher.Form}
-              method='POST'
-              action='/translate'
-              submitLabel={loading ? 'Translating...' : 'Translate'}
-              submitLoading={loading}
-              submitSuccess={fetcher.data?.translated}
-              submitError={fetcher.data?.error}
-              inputPlaceholder="Enter the text to translate here"
-              menuLabel="Engine:"
-              menuButtonAriaLabel="Choose translation engine"
-              menuOptions={menuItems}
-              menuActiveKey={engine}
-              onMenuSelect={(key) => setEngine(key as TranslationEngine)}
-            />
-          </Content>
         </div>
       </section>
     </main>
