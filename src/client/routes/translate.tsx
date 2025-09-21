@@ -3,6 +3,9 @@ import { useFetcher, useLoaderData } from "react-router";
 import { InputForm } from "../components/molecules/InputForm";
 import { Content } from "../components/atoms/Content";
 import { SidePane } from "../components/atoms/Sidepane";
+import { List } from "../components/atoms/List";
+import { ListItem } from "../components/atoms/ListItem";
+import { ButtonForm } from "../components/molecules/ButtonForm";
 import { Env } from "../../shared/utils/Env";
 import { waitMS } from "../../shared/utils/functions";
 import {getTranslationServiceSingleton} from "../../server/service";
@@ -55,24 +58,27 @@ export default function Translate(props: Route.ComponentProps) {
     <div className="flex h-full py-3 gap-4">
       <SidePane>
         <h2 className="font-semibold mb-2">Recent translations</h2>
-        <ul className="space-y-2">
+        <List>
           {loaderData.history.map(item => (
-            <li key={item.key} className="flex items-start justify-between gap-2">
-              <div className="text-sm">
-                <div className="font-medium truncate max-w-[14rem]" title={item.originalText}>{item.originalText}</div>
-                <div className="text-zinc-500 truncate max-w-[14rem]" title={item.translatedText}>{item.translatedText}</div>
-              </div>
-              <fetcher.Form method="POST" action="/translate">
-                <input type="hidden" name="_intent" value="delete_history" />
-                <input type="hidden" name="id" value={item.key} />
-                <button type="submit" className="text-xs text-red-600 hover:underline">Delete</button>
-              </fetcher.Form>
-            </li>
+            <ListItem
+              key={item.key}
+              title={item.originalText}
+              subtitle={item.translatedText}
+              right={
+                <ButtonForm
+                  component={fetcher.Form}
+                  method="POST"
+                  action="/translate"
+                  fields={{ _intent: "delete_history", id: item.key }}
+                  label="Delete"
+                />
+              }
+            />
           ))}
           {loaderData.history.length === 0 && (
-            <li className="text-sm text-zinc-500">No translations yet</li>
+            <ListItem className="text-sm text-zinc-500">No translations yet</ListItem>
           )}
-        </ul>
+        </List>
       </SidePane>
       <Content>
         <InputForm
