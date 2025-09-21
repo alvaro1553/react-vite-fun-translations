@@ -1,11 +1,12 @@
 import type { Route } from "./+types/translate";
-import { useFetcher, useLoaderData } from "react-router";
+import { useFetcher, useLoaderData, Link } from "react-router";
 import { useState } from "react";
 import { InputForm } from "../components/molecules/InputForm";
 import { Content } from "../components/atoms/Content";
 import { SidePane } from "../components/atoms/Sidepane";
 import { List } from "../components/atoms/List";
 import { ListItem } from "../components/atoms/ListItem";
+import { ShortLeftArrow } from "../components/atoms/ShortLeftArrow";
 import { ButtonForm } from "../components/molecules/ButtonForm";
 import { Env } from "../../shared/utils/Env";
 import { waitMS } from "../../shared/utils/functions";
@@ -56,7 +57,7 @@ export async function action({ request }: Route.ActionArgs) {
   if (isTranslationError(translation)) {
     let errorMessage = translation.message;
     if (translation.message.includes('Too Many Requests')) {
-      errorMessage += ' You can choose Alvaro\'s engine in the meantime, which is free for now :)'
+      errorMessage += ' You can input cached translations or switch to Alvaro\'s engine in the meantime, which is unlimited :)'
     }
     return { error: errorMessage };
   }
@@ -80,6 +81,17 @@ export default function Translate(props: Route.ComponentProps) {
   return (
     <main className="min-h-screen bg-gradient-to-b from-indigo-50 to-white text-zinc-800">
       <section className="container mx-auto px-4 py-12">
+        <div className="mb-6">
+          <Link to="/" aria-label="Home" className="group inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-700">
+            <ShortLeftArrow className="h-5 w-5 flex-shrink-0 self-center" />
+            <span className="hidden sm:inline text-sm">Home</span>
+          </Link>
+        </div>
+        <div role="note" className="mb-6 rounded-md border border-indigo-200 bg-indigo-50 text-indigo-800 p-4">
+          <p className="text-sm">
+            Heads up: The external FunTranslations API limits Yoda and Pirate engines to 10 requests per hour. Feel free to surpass this limit ! the app will show a friendly message, plus you can keep going using cached results or switching to Alvaro's unlimited engine.
+          </p>
+        </div>
         <div className="flex items-start gap-6">
           <SidePane>
             <h2 className="font-semibold text-zinc-700 mb-3">Recent translations</h2>
@@ -88,7 +100,7 @@ export default function Translate(props: Route.ComponentProps) {
                 <ListItem
                   key={item.key}
                   title={item.originalText}
-                  subtitle={item.translatedText}
+                  subtitle={`${item.engine}: ${item.translatedText}`}
                   right={
                     <ButtonForm
                       component={fetcher.Form}
