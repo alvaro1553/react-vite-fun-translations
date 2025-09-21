@@ -78,6 +78,7 @@ export function WelcomePage(props: { children?: React.ReactNode }) {
   │  └─ routes.ts
   ├─ server/
   │  ├─ adapter/        <- Top layer: adapt/map external services e.g. Postgres, AWS-S3, etc.  
+  │  │  ├─ CacheAdapter.ts
   │  │  ├─ DatabaseAdapter.ts
   │  │  └─ TranslationAPI.ts
   │  ├─ repo/           <- Middle layer e.g. abstract usage of collections/tables

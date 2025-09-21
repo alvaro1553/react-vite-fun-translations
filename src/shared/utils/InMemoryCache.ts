@@ -1,6 +1,6 @@
 type Entry<V> = { value: V; expiresAt?: number }
 
-export type CacheAdapter<K, V> = {
+export type CacheDriver<K, V> = {
   get: (key: K) => V | undefined;
   set: (key: K, value: V, ttlMs?: number) => void;
   has: (key: K) => boolean;
@@ -30,7 +30,7 @@ export type InMemoryCacheOptions = {
  * Class representing an in-memory cache with optional time-to-live (TTL) for
  * each entry. Provides methods to store, retrieve, and manage cached data.
  */
-export class InMemoryCache<K, V> implements CacheAdapter<K, V> {
+export class InMemoryCache<K, V> implements CacheDriver<K, V> {
   readonly #map = new Map<K, Entry<V>>();
   readonly #defaultTTLms?: number;
   readonly #getNow: () => number;

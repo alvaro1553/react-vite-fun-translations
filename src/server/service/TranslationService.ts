@@ -1,5 +1,5 @@
 import { createTranslation, type Translation, type TranslationEngine, type TranslationKey, type TranslationText } from "../../shared/entities/Translation";
-import type { CacheAdapter } from "../../shared/utils/InMemoryCache";
+import { CacheAdapter } from "../adapter/CacheAdapter";
 import { TranslationAPI } from "../adapter/TranslationAPI";
 import { TranslationRepo } from "../repo/TranslationRepo";
 import {isTranslationError, type TranslationError} from "../../shared/entities/TranslationError";

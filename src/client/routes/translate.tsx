@@ -100,7 +100,7 @@ export default function Translate(props: Route.ComponentProps) {
         <div className="flex items-start gap-6">
           <SidePane>
             <div className="mb-3 flex items-center justify-between gap-2">
-              <h2 className="font-semibold text-zinc-700">Recent translations</h2>
+              <h2 className="font-semibold text-zinc-700">Recent Translations</h2>
               {loaderData.history.length > 1 && (
                 <ButtonForm
                   component={fetcher.Form}
