@@ -1,8 +1,8 @@
 import type { Route } from "./+types/translate";
-import { TranslateForm } from "../translate/form";
-import Content from "view/components/Content";
-import SidePane from "view/components/Sidepane";
-import {getTranslationServiceSingleton} from "../../io/service/TranslationService";
+import { TranslateForm } from "../components/molecules/form";
+import Content from "../components/atoms/Content";
+import SidePane from "../components/atoms/Sidepane";
+import {getTranslationServiceSingleton} from "../../server/service/TranslationService";
 
 export function meta({}: Route.MetaArgs) {
   return [

@@ -1,6 +1,6 @@
-import type {Translation, TranslationText} from "domain/types/Translation";
+import type {Translation, TranslationText} from "../../shared/types/Translation";
 import TranslationsAPI from "../adapter/TranslationsAPI";
-import { InMemoryCache } from "../../utils/InMemoryCache";
+import { InMemoryCache } from "../../shared/utils/InMemoryCache";
 
 let translationServiceSingleton: TranslationService;
 

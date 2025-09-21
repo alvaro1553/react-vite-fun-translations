@@ -1,5 +1,3 @@
-import type {Translation} from "../domain/types/Translation";
-
 type Entry<V> = { value: V; expiresAt?: number }
 
 export type InMemoryCacheOptions = {

@@ -1,6 +1,6 @@
 import { Form } from "react-router";
-import Button from "../../view/components/Button";
-import Input from "../../view/components/Input";
+import Button from "../atoms/Button";
+import Input from "../atoms/Input";
 
 export function TranslateForm() {
   return (

@@ -1,6 +1,6 @@
-import { type Translation } from "../../domain/types/Translation";
-import { invariant } from "../../utils/invariant";
-import {Obj} from "../../utils/Obj";
+import { type Translation } from "../../shared/types/Translation";
+import { invariant } from "../../shared/utils/invariant";
+import {Obj} from "../../shared/utils/Obj";
 
 const FunTranslationsEngines = ['yoda', 'pirate'] as const;
 
