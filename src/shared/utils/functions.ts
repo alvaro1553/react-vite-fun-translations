@@ -18,3 +18,7 @@ export function invariant(condition: unknown, msg?: string, ...values: unknown[]
 
   throw new Error(message)
 }
+
+export function waitMS(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

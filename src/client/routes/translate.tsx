@@ -1,8 +1,11 @@
 import type { Route } from "./+types/translate";
-import { TranslateForm } from "../components/molecules/form";
-import Content from "../components/atoms/Content";
-import SidePane from "../components/atoms/Sidepane";
-import {getTranslationServiceSingleton} from "../../server/service/TranslationService";
+import { useFetcher} from "react-router";
+import { InputForm } from "../components/molecules/InputForm";
+import { Content } from "../components/atoms/Content";
+import { SidePane } from "../components/atoms/Sidepane";
+import { getTranslationServiceSingleton } from "../../server/service/TranslationService";
+import {Env} from "../../shared/utils/Env";
+import {waitMS} from "../../shared/utils/functions";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -18,6 +21,9 @@ export async function action({ request }: Route.ActionArgs) {
     return { error: "Invalid text. Please insert a valid string" }
   }
   const translationService = getTranslationServiceSingleton();
+  if (Env.NO_PROD) {
+    await waitMS(600);
+  }
   const { translatedText } = await translationService.getTranslation(text);
   // should I do something with that request?
 
@@ -25,15 +31,22 @@ export async function action({ request }: Route.ActionArgs) {
 }
 
 export default function Translate(props: Route.ComponentProps) {
-  const { actionData } = props;
+  const fetcher = useFetcher();
+  const loading = fetcher.state === "submitting";
 
   return (
     <div className="flex h-full py-3">
       <SidePane>It would be nice to see past translations here.</SidePane>
       <Content>
-        <TranslateForm />
-        {actionData?.error && <p className="text-red-500">{actionData.error}</p>}
-        {actionData?.translated && <p className="text-green-500">{actionData.translated}</p>}
+        <InputForm
+          component={fetcher.Form}
+          method='POST'
+          action='/translate'
+          submit={loading ? 'Translating...' : 'Translate'}
+          loading={loading}
+          success={fetcher.data?.translated}
+          error={fetcher.data?.error}
+        />
       </Content>
     </div>
   );

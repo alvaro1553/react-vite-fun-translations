@@ -2,7 +2,7 @@ import clsx from "clsx";
 
 export interface SidePaneProps extends React.ComponentProps<'div'>{}
 
-export default function Content(props: SidePaneProps) {
+export function SidePane(props: SidePaneProps) {
   const { className, ...rest } = props;
   return (
     <div

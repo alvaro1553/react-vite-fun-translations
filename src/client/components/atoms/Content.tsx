@@ -2,7 +2,7 @@ import clsx from "clsx";
 
 export interface ContentProps extends React.ComponentProps<'div'>{}
 
-export default function Content(props: ContentProps) {
+export function Content(props: ContentProps) {
   const { className, ...rest } = props;
   return (
     <div

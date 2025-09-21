@@ -2,7 +2,7 @@ import clsx from "clsx";
 
 export interface InputProps extends React.ComponentProps<'input'>{}
 
-export default function Input(props: InputProps) {
+export function Input(props: InputProps) {
   const { className, ...rest } = props;
   return (
     <input

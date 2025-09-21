@@ -1,5 +1,5 @@
 import { type Translation } from "../../shared/types/Translation";
-import { invariant } from "../../shared/utils/invariant";
+import { invariant } from "../../shared/utils/functions";
 import {Obj} from "../../shared/utils/Obj";
 
 const FunTranslationsEngines = ['yoda', 'pirate'] as const;
