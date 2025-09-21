@@ -78,48 +78,52 @@ export default function Translate(props: Route.ComponentProps) {
   const menuItems = Engines.map((e) => ({ key: e, label: ENGINE_LABELS[e] }));
 
   return (
-    <div className="flex h-full py-3 gap-4">
-      <SidePane>
-        <h2 className="font-semibold mb-2">Recent translations</h2>
-        <List>
-          {loaderData.history.map(item => (
-            <ListItem
-              key={item.key}
-              title={item.originalText}
-              subtitle={item.translatedText}
-              right={
-                <ButtonForm
-                  component={fetcher.Form}
-                  method="POST"
-                  action="/translate"
-                  fields={{ _intent: "delete_history", id: item.key }}
-                  label="Delete"
+    <main className="min-h-screen bg-gradient-to-b from-indigo-50 to-white text-zinc-800">
+      <section className="container mx-auto px-4 py-12">
+        <div className="flex items-start gap-6">
+          <SidePane>
+            <h2 className="font-semibold text-zinc-700 mb-3">Recent translations</h2>
+            <List>
+              {loaderData.history.map((item) => (
+                <ListItem
+                  key={item.key}
+                  title={item.originalText}
+                  subtitle={item.translatedText}
+                  right={
+                    <ButtonForm
+                      component={fetcher.Form}
+                      method="POST"
+                      action="/translate"
+                      fields={{ _intent: "delete_history", id: item.key }}
+                      label="Delete"
+                    />
+                  }
                 />
-              }
+              ))}
+              {loaderData.history.length === 0 && (
+                <ListItem className="text-sm text-zinc-500">No translations yet</ListItem>
+              )}
+            </List>
+          </SidePane>
+          <Content>
+            <InputForm
+              component={fetcher.Form}
+              method='POST'
+              action='/translate'
+              submitLabel={loading ? 'Translating...' : 'Translate'}
+              submitLoading={loading}
+              submitSuccess={fetcher.data?.translated}
+              submitError={fetcher.data?.error}
+              inputPlaceholder="Enter the text to translate here"
+              menuLabel="Engine:"
+              menuButtonAriaLabel="Choose translation engine"
+              menuOptions={menuItems}
+              menuActiveKey={engine}
+              onMenuSelect={(key) => setEngine(key as TranslationEngine)}
             />
-          ))}
-          {loaderData.history.length === 0 && (
-            <ListItem className="text-sm text-zinc-500">No translations yet</ListItem>
-          )}
-        </List>
-      </SidePane>
-      <Content>
-        <InputForm
-          component={fetcher.Form}
-          method='POST'
-          action='/translate'
-          submitLabel={loading ? 'Translating...' : 'Translate'}
-          submitLoading={loading}
-          submitSuccess={fetcher.data?.translated}
-          submitError={fetcher.data?.error}
-          inputPlaceholder="Enter the text to translate here"
-          menuLabel="Engine:"
-          menuButtonAriaLabel="Choose translation engine"
-          menuOptions={menuItems}
-          menuActiveKey={engine}
-          onMenuSelect={(key) => setEngine(key as TranslationEngine)}
-        />
-      </Content>
-    </div>
+          </Content>
+        </div>
+      </section>
+    </main>
   );
 }

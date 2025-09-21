@@ -32,7 +32,7 @@ export function LoadingSpinner({ size = "md", className, ...rest }: LoadingSpinn
       aria-live="polite"
       aria-busy="true"
       className={clsx(
-        "inline-block rounded-full border-current border-t-transparent animate-spin text-amber-500",
+        "inline-block rounded-full border-current border-t-transparent animate-spin text-indigo-600",
         sizeClass,
         className
       )}

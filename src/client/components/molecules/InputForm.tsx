@@ -49,11 +49,7 @@ export function InputForm<T extends ElementType>(props: InputFormProps<T>) {
       <fieldset className="flex flex-col items-start gap-6" aria-busy={submitLoading}>
         <Input name={inputName} placeholder={inputPlaceholder} required/>
         <input type="hidden" name={menuOptionName} value={menuActiveKey} />
-        <div className="inline-flex items-stretch gap-2">
-          <Button type="submit" disabled={submitLoading} className="inline-flex items-center gap-2">
-            {submitLoading && <LoadingSpinner size="sm" />}
-            <span>{submitLabel}</span>
-          </Button>
+        <div className="flex w-full items-center gap-2">
           <div className="inline-flex items-center gap-2">
             <span className="text-sm text-zinc-600">{menuLabel}</span>
             <MenuButton
@@ -72,6 +68,10 @@ export function InputForm<T extends ElementType>(props: InputFormProps<T>) {
               ))}
             </MenuButton>
           </div>
+          <Button type="submit" disabled={submitLoading} className="ml-auto inline-flex items-center gap-2">
+            {submitLoading && <LoadingSpinner size="sm" />}
+            <span>{submitLabel}</span>
+          </Button>
         </div>
         {submitSuccess && <SuccessMessage>{submitSuccess}</SuccessMessage>}
         {submitError && <ErrorMessage>{submitError}</ErrorMessage>}

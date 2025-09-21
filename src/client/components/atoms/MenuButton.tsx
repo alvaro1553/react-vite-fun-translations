@@ -45,7 +45,7 @@ export function MenuButton(props: MenuButtonProps) {
         aria-label={buttonAriaLabel}
         onClick={() => setOpen((o) => !o)}
         className={clsx(
-          "hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-300",
+          "hover:bg-indigo-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-300",
           buttonClassName,
         )}
       >
