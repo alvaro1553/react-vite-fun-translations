@@ -2,6 +2,7 @@ import type { Translation, TranslationKey, TranslationText } from "../../shared/
 import type { CacheAdapter } from "../../shared/utils/InMemoryCache";
 import { TranslationAPI } from "../adapter/TranslationAPI";
 import { TranslationRepo } from "../repo/TranslationRepo";
+import {isTranslationError, type TranslationError} from "../../shared/entities/TranslationError";
 
 export interface TranslationServiceOptions {
   api: TranslationAPI;
@@ -30,7 +31,7 @@ export class TranslationService {
    * if `getTranslation` is called with that `text`. The default invalidation
    * time is 5 minutes.
    */
-  async getTranslationOrCached(text: TranslationText, options?: { invalidateCacheInMS?: number }): Promise<Translation> {
+  async getTranslationOrCached(text: TranslationText, options?: { invalidateCacheInMS?: number }): Promise<Translation | TranslationError> {
     const { invalidateCacheInMS = 1000 * 60 * 5 } = options ?? {};
 
     const key = this.getCacheKey(text);
@@ -41,6 +42,10 @@ export class TranslationService {
     }
 
     const translation = await this.api.getTranslation(text);
+    if (isTranslationError(translation)) {
+      return translation;
+    }
+
     this.cache.set(key, translation, invalidateCacheInMS);
     await this.repo.insertOrMoveToTop(translation);
     return translation;

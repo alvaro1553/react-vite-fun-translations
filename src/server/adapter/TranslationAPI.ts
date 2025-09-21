@@ -1,6 +1,13 @@
-import {createTranslation, type Translation} from "../../shared/entities/Translation";
+import {
+  createTranslation,
+  type Translation,
+} from "../../shared/entities/Translation";
 import { invariant } from "../../shared/utils/functions";
 import {Obj} from "../../shared/utils/Obj";
+import {
+  createTranslationError,
+  type TranslationError
+} from "../../shared/entities/TranslationError";
 
 const FunTranslationsEngines = ['yoda', 'pirate'] as const;
 
@@ -39,18 +46,36 @@ const fromDTO = (funTranslationsDTO: unknown): Translation => {
 }
 
 export class TranslationAPI {
-  async getTranslation(text: string): Promise<Translation> {
-    const response = await fetch(
-      "https://api.funtranslations.com/translate/yoda.json",
-      {
-        method: "POST",
-        headers: {
-          contentType: "x-www-form-urlencoded",
-        },
-        body: new URLSearchParams({ text })
+  async getTranslation(text: string): Promise<Translation | TranslationError> {
+    try {
+      const response = await fetch(
+        "https://api.funtranslations.com/translate/yoda.json",
+        {
+          method: "POST",
+          headers: {
+            contentType: "x-www-form-urlencoded",
+          },
+          body: new URLSearchParams({text})
+        }
+      );
+
+      const json = await response.json();
+      if (json.error !== undefined) {
+        const message = json.error.message;
+        if (json.error.code === 429) {
+          return createTranslationError(message);
+        }
+        return createTranslationError(message);
       }
-    );
-    const json = await response.json();
-    return fromDTO(json);
+
+      if (!response.ok) {
+        return createTranslationError(`Failed to translate. Server responded with status ${response.status}`);
+      }
+
+      return fromDTO(json);
+
+    } catch (e) {
+      return createTranslationError(e instanceof Error ? e.message : 'Unknown error');
+    }
   }
 }

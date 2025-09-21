@@ -10,6 +10,7 @@ import { Env } from "../../shared/utils/Env";
 import { waitMS } from "../../shared/utils/functions";
 import {getTranslationServiceSingleton} from "../../server/service";
 import type {Translation} from "../../shared/entities/Translation";
+import {isTranslationError} from "../../shared/entities/TranslationError";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -45,8 +46,12 @@ export async function action({ request }: Route.ActionArgs) {
   if (Env.NO_PROD) {
     await waitMS(600);
   }
-  const { translatedText } = await translationService.getTranslationOrCached(text);
-  return { error: null, translated: translatedText };
+  const translation = await translationService.getTranslationOrCached(text);
+  if (isTranslationError(translation)) {
+    return { error: translation.message };
+  }
+
+  return { error: null, translated: translation.translatedText };
 }
 
 export default function Translate(props: Route.ComponentProps) {
